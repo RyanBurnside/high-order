@@ -1,6 +1,6 @@
 
 ;; Generate a sequence where each item gets an int index that gets passed into
-;; function
+;  function
 (define (make-sequence function num-times . start-value)
   (let ((start (if (pair? start-value) (car start-value) 0)))
     (define (loop num-times collection)
@@ -119,3 +119,19 @@
 	(car lists)
 	(join (cons (join-lists (car lists) (cadr lists)) (cddr lists)))))
   (join (cons l rest)))
+
+
+;; Additional Boolean logic functions
+(define (xor a b)
+  (cond ((and (eq? a #f) (eq? b #f)) #f)
+        ((and (eq? a #t) (eq? b #t)) #f)
+        (else #t)))
+
+(define (nand a b)
+  (not (and a b)))
+
+(define (nor a b)
+  (not (or a b)))
+
+(define (xnor a b)
+  (not (xor a b)))
