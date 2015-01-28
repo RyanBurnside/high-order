@@ -1,3 +1,16 @@
+
+;; Generate a sequence where each item gets an int index that gets passed into
+;; function
+(define (make-sequence function num-times . start-value)
+  (let ((start (if (pair? start-value) (car start-value) 0)))
+    (define (loop num-times collection)
+      (cond ((< num-times 0)
+             (map function collection))
+            (else (loop (- num-times 1) 
+                        (cons (+ num-times start)
+                              collection)))))
+      (loop (- num-times 1) '())))
+     
 ;; Find nth element of a list
 (define (nth index collection)
   (cond ((= 0 index) (car collection))
