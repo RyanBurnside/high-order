@@ -112,8 +112,7 @@
   (define (mrge lst)
     (if (not (pair? lst))
         lst
-        (reduce (lambda (a b) (merge predicate a b)) lst)))
-                
+        (reduce (lambda (a b) (merge predicate a b)) lst)))   
   (mrge (map compare-items (make-pairs lst cons '()))))
 
 ;; Return a slice of the list
