@@ -54,6 +54,74 @@
 			  results)))))
   (loop predicate collection '()))
 
+;; A function that bisects a list into 2 (useful for sorting)
+;  Returns '(() (item)) in the case of a single element list
+(define (bisect lst)
+  (let ((l (floor (/ (length lst) 2))))
+    (define (loop lst result counter)
+      (if (= counter 0)
+          (cons  (reverse result) (list lst))
+          (loop (cdr lst) (cons (car lst) result) (- counter 1))))
+    (loop lst '() l)))
+
+;; A function to merge two lists using a comparison function (not a sort)
+;  precicate should take a and b and return false if a <= b
+(define (merge predicate collection collection2)
+  (define (loop collection collection2 result)
+    (cond ((and (eq? collection '()) (eq? collection2 '()))
+           (reverse result))
+          ((eq? collection '())
+           (loop collection (cdr collection2) (cons (car collection2) result)))
+          ((eq? collection2 '())
+           (loop (cdr collection) collection2 (cons (car collection) result)))
+          ((predicate (car collection) (car collection2))
+           (loop (cdr collection) collection2 (cons (car collection) result)))
+          (else
+           (loop collection 
+                 (cdr collection2) 
+                 (cons (car collection2) 
+                       result)))))
+  (loop collection collection2 '()))
+
+;; Return first n number of items
+(define (get-n-items num lst)
+  (define (loop lst num results)
+    (if (< num 1)
+        (reverse results)
+        (loop (cdr lst) (- num 1) (cons (car lst) results))))
+  (loop lst num '()))
+
+;; Merge sort provide comperison operation for predicate
+;  < will return a list in asc order > in desc order
+(define (sort predicate lst)
+  (define (make-pairs lst join-func result)
+    (cond ((not (pair? lst))
+           result)
+          ((eq? (cdr lst) '()) ; 1 element list
+           (join-func (list (car lst)) result))
+          (else
+           (make-pairs (cddr lst) 
+                       join-func 
+                       (cons (list (car lst) (cadr lst)) result)))))
+  (define (compare-items items)
+    (cond ((eq? (cdr items) '())
+           items)
+          ((predicate (car items) (cadr items))
+           items)
+          (else (list (cadr items) (car items)))))
+  (define (mrge lst)
+    (if (not (pair? lst))
+        lst
+        (reduce (lambda (a b) (merge predicate a b)) lst)))
+                
+  (mrge (map compare-items (make-pairs lst cons '()))))
+
+;; Return a slice of the list
+(define (slice lst start count)
+  (if (> start 1)
+      (slice (cdr lst) (- start 1) count)
+      (get-n-items count lst)))
+
 ;; Find element that best satisfies the predicate (better? a b) a b)
 (define (satisfies-best predicate collection)
   (reduce (lambda (a b) (if (predicate a b) a b)) collection))
@@ -135,3 +203,22 @@
 
 (define (xnor a b)
   (not (xor a b)))
+
+;; Some random number genertion routines
+;  Not particularly strong but OK for light testing of small data
+
+(define random ;range [0 10)
+  (let ((a 69069) (c 1) (m (expt 2 32)) (seed 19380110))
+    (lambda new-seed
+      (if (pair? new-seed)
+          (set! seed (car new-seed))
+          (set! seed (modulo (+ (* seed a) c) m)))
+      (/ seed m))))
+
+(define (rand-range max . min)
+  (let ((m (if (pair? min) (car min) 0)))
+    (interpolate + * - m max (random))))
+
+(define (rand-int-range max . min)
+  (let ((m (if (pair? min) (car min) 0)))
+    (round (rand-range max m))))
