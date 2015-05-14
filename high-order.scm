@@ -36,13 +36,14 @@
   (loop collection '() 0))
 
 ;; Apply procedure to car and cadr of a list until one element remains
-(define (reduce function collection)
-  (define (loop collection)
-    (cond ((<= (length collection) 1)
-	   (if (eq? collection '()) collection (car collection)))
-	  (else (loop (cons (function (car collection) (cadr collection))
-			    (cddr collection))))))
-  (loop collection))
+(define (reduce func lis)
+  (cond ((null? lis) '())
+        ((eq? (cdr lis) '())
+         (car lis))
+        (else
+         (reduce func (cons (func (car lis)
+                                  (cadr lis))
+                            (cddr lis))))))
 
 ;; Collect all items into a list that satisfy the predicate
 (define (filter predicate collection)
